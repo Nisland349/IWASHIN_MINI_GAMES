@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>MG03: 委員会メンバーを揃えろ！</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bowlby+One&family=Noto+Sans+JP:wght@700;900&family=Yusei+Magic&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Noto Sans JP', sans-serif;
+    overflow: hidden;
+  }
+
+  .game-frame {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    border: 8px solid #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 0 4px #ffeb3b, 0 20px 60px rgba(0,0,0,0.5);
+    background: #fff;
+  }
+
+  canvas {
+    display: block;
+    background: linear-gradient(135deg, #ffe4ec 0%, #fff5cc 50%, #d4f1ff 100%);
+  }
+
+  /* スタート画面 */
+  .start-screen {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, #ff6b9d 0%, #c44569 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .start-screen::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 20px,
+      rgba(255,255,255,0.1) 20px,
+      rgba(255,255,255,0.1) 40px
+    );
+    animation: slide 3s linear infinite;
+  }
+
+  @keyframes slide {
+    from { transform: translate(0, 0); }
+    to { transform: translate(40px, 40px); }
+  }
+
+  .title-jp {
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 72px;
+    color: #fff;
+    text-shadow:
+      4px 4px 0 #000,
+      8px 8px 0 #ffeb3b,
+      12px 12px 20px rgba(0,0,0,0.4);
+    transform: rotate(-3deg);
+    margin-bottom: 20px;
+    text-align: center;
+    line-height: 1;
+    z-index: 1;
+    animation: bounce 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: rotate(-3deg) translateY(0); }
+    to { transform: rotate(-3deg) translateY(-10px); }
+  }
+
+  .subtitle {
+    font-family: 'Yusei Magic', sans-serif;
+    font-size: 28px;
+    color: #fff;
+    background: #000;
+    padding: 8px 24px;
+    transform: rotate(2deg);
+    z-index: 1;
+    margin-bottom: 30px;
+  }
+
+  .instruction {
+    font-size: 20px;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    padding: 12px 32px;
+    border-radius: 30px;
+    z-index: 1;
+    font-weight: 900;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* HUD */
+  .hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .objective {
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 22px;
+    transform: rotate(-2deg);
+    border: 4px solid #fff;
+    box-shadow: 6px 6px 0 #ff6b9d;
+  }
+
+  .objective .target-count {
+    color: #ffeb3b;
+    font-size: 28px;
+  }
+
+  .timer {
+    background: #fff;
+    border: 6px solid #000;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 48px;
+    color: #000;
+    box-shadow: 0 6px 0 #000;
+  }
+
+  .timer.danger {
+    color: #ff1744;
+    animation: shake 0.2s linear infinite;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  /* スコア表示 */
+  .score-display {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 5;
+  }
+
+  .member-slot {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #000;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    box-shadow: 4px 4px 0 #000;
+    transition: all 0.3s;
+  }
+
+  .member-slot.filled {
+    background: #4caf50;
+    transform: scale(1.1) rotate(360deg);
+  }
+
+  .member-slot.empty {
+    color: #ccc;
+  }
+
+  /* 結果画面 */
+  .result-screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 20;
+  }
+
+  .result-screen.success {
+    background: radial-gradient(circle, #ffeb3b 0%, #4caf50 100%);
+    display: flex;
+  }
+
+  .result-screen.failed {
+    background: radial-gradient(circle, #ff1744 0%, #1a1a2e 100%);
+    display: flex;
+  }
+
+  .result-text {
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 96px;
+    color: #fff;
+    text-shadow: 6px 6px 0 #000;
+    transform: rotate(-5deg);
+    animation: pop 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0) rotate(-5deg); }
+    100% { transform: scale(1) rotate(-5deg); }
+  }
+
+  .retry-btn {
+    margin-top: 30px;
+    padding: 16px 40px;
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 28px;
+    background: #fff;
+    color: #000;
+    border: 6px solid #000;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #000;
+    transition: all 0.1s;
+  }
+
+  .retry-btn:hover {
+    transform: translateY(2px);
+    box-shadow: 0 6px 0 #000;
+  }
+
+  .retry-btn:active {
+    transform: translateY(8px);
+    box-shadow: 0 0 0 #000;
+  }
+
+  /* 飛んでくるエフェクト用 */
+  .floating-text {
+    position: absolute;
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 36px;
+    pointer-events: none;
+    animation: floatUp 0.8s ease-out forwards;
+    z-index: 6;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-100px) scale(1); opacity: 0; }
+  }
+
+  /* デバッグ情報 */
+  .debug {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    color: #fff;
+    font-size: 12px;
+    background: rgba(0,0,0,0.7);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="game-frame">
+  <!-- スタート画面 -->
+  <div class="start-screen" id="startScreen">
+    <div class="title-jp">委員会メンバーを<br>揃えろ！</div>
+    <div class="subtitle">独立性のある専門家を選ぶのだ！</div>
+    <div class="instruction">▶ クリックでスタート</div>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <!-- HUD -->
+  <div class="hud" id="hud" style="display:none;">
+    <div class="objective">
+      委員会メンバー<br>
+      <span class="target-count">2人</span> 集めろ！
+    </div>
+    <div class="timer" id="timer">5</div>
+  </div>
+
+  <!-- スコア表示 -->
+  <div class="score-display" id="scoreDisplay" style="display:none;">
+    <div class="member-slot empty" id="slot1">?</div>
+    <div class="member-slot empty" id="slot2">?</div>
+  </div>
+
+  <!-- 結果画面 -->
+  <div class="result-screen" id="resultScreen">
+    <div class="result-text" id="resultText">SUCCESS!</div>
+    <button class="retry-btn" onclick="resetGame()">もう一度</button>
+  </div>
+</div>
+
+<div class="debug">MG03_Committee | Mockup v1.0</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// キャラクターの種類
+const CHAR_TYPES = {
+  LAWYER:   { label: '弁護士',   emoji: '⚖️', color: '#3f51b5', isCommittee: true },
+  ACCOUNTANT: { label: '会計士', emoji: '📊', color: '#009688', isCommittee: true },
+  PROFESSOR: { label: '教授',    emoji: '🎓', color: '#673ab7', isCommittee: true },
+  STAKEHOLDER: { label: '利害関係者', emoji: '💼', color: '#f44336', isCommittee: false },
+  EXECUTIVE: { label: '元役員',   emoji: '👔', color: '#e91e63', isCommittee: false },
+};
+
+let characters = [];
+let collected = 0;
+let timeLeft = 5;
+let gameState = 'ready'; // ready, playing, success, failed
+let timerInterval;
+let animationId;
+
+// キャラクター生成
+function spawnCharacters() {
+  characters = [];
+  const types = Object.keys(CHAR_TYPES);
+  const positions = [];
+
+  // 6人配置（委員会メンバー3人＋利害関係者3人）
+  const layout = [
+    'LAWYER', 'STAKEHOLDER', 'ACCOUNTANT',
+    'EXECUTIVE', 'PROFESSOR', 'STAKEHOLDER'
+  ].sort(() => Math.random() - 0.5);
+
+  for (let i = 0; i < 6; i++) {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = 150 + col * 250 + (Math.random() - 0.5) * 40;
+    const y = 200 + row * 180 + (Math.random() - 0.5) * 30;
+
+    characters.push({
+      type: layout[i],
+      x: x,
+      y: y,
+      baseY: y,
+      radius: 50,
+      collected: false,
+      bounce: Math.random() * Math.PI * 2,
+      wobble: Math.random() * Math.PI * 2,
+      shaking: 0,
+    });
+  }
+}
+
+// キャラクター描画
+function drawCharacter(char) {
+  if (char.collected) return;
+
+  const type = CHAR_TYPES[char.type];
+  const bounceY = Math.sin(char.bounce) * 5;
+  const wobble = Math.sin(char.wobble) * 0.05;
+  const shakeX = char.shaking > 0 ? (Math.random() - 0.5) * 10 : 0;
+
+  ctx.save();
+  ctx.translate(char.x + shakeX, char.y + bounceY);
+  ctx.rotate(wobble);
+
+  // 影
+  ctx.beginPath();
+  ctx.ellipse(0, char.radius + 10, char.radius * 0.8, 8, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fill();
+
+  // 体（円）
+  ctx.beginPath();
+  ctx.arc(0, 0, char.radius, 0, Math.PI * 2);
+  ctx.fillStyle = type.color;
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
+
+  // ハイライト
+  ctx.beginPath();
+  ctx.arc(-15, -15, 15, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fill();
+
+  // 顔のパーツ
+  // 目
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(-15, -5, 10, 0, Math.PI * 2);
+  ctx.arc(15, -5, 10, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 黒目
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(-13, -3, 4, 0, Math.PI * 2);
+  ctx.arc(17, -3, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 口
+  ctx.beginPath();
+  if (type.isCommittee) {
+    // にっこり
+    ctx.arc(0, 10, 12, 0, Math.PI);
+  } else {
+    // にやり（悪い顔）
+    ctx.moveTo(-12, 15);
+    ctx.quadraticCurveTo(0, 5, 12, 15);
+  }
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#000';
+  ctx.stroke();
+
+  // 絵文字バッジ（職業アイコン）
+  ctx.font = '32px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(type.emoji, 0, char.radius + 30);
+
+  // 職業ラベル
+  ctx.font = 'bold 16px "Noto Sans JP", sans-serif';
+  const labelW = ctx.measureText(type.label).width + 16;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(-labelW/2, char.radius + 45, labelW, 22);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(type.label, 0, char.radius + 56);
+
+  ctx.restore();
+}
+
+// 背景パターン
+function drawBackground() {
+  // 背景のドット
+  ctx.fillStyle = 'rgba(255, 107, 157, 0.15)';
+  for (let x = 0; x < canvas.width; x += 40) {
+    for (let y = 0; y < canvas.height; y += 40) {
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 中央の集合エリア（指示マーク）
+  ctx.save();
+  ctx.translate(canvas.width / 2, 80);
+  ctx.fillStyle = 'rgba(255, 235, 59, 0.6)';
+  ctx.beginPath();
+  ctx.moveTo(0, -25);
+  for (let i = 0; i < 10; i++) {
+    const angle = (i / 10) * Math.PI * 2;
+    const r = i % 2 === 0 ? 25 : 15;
+    ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+// メインループ
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
+
+  characters.forEach(char => {
+    char.bounce += 0.05;
+    char.wobble += 0.03;
+    if (char.shaking > 0) char.shaking--;
+    drawCharacter(char);
+  });
+
+  if (gameState === 'playing') {
+    animationId = requestAnimationFrame(gameLoop);
+  }
+}
+
+// クリック処理
+canvas.addEventListener('click', (e) => {
+  if (gameState !== 'playing') return;
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
+
+  for (const char of characters) {
+    if (char.collected) continue;
+    const dx = mx - char.x;
+    const dy = my - char.y;
+    if (Math.sqrt(dx*dx + dy*dy) < char.radius) {
+      handleCharClick(char, e.clientX, e.clientY);
+      break;
+    }
+  }
+});
+
+function handleCharClick(char, screenX, screenY) {
+  const type = CHAR_TYPES[char.type];
+
+  if (type.isCommittee) {
+    // 正解！
+    char.collected = true;
+    collected++;
+    showFloatingText('+1!', screenX, screenY, '#4caf50');
+    updateScore();
+
+    if (collected >= 2) {
+      endGame('success');
+    }
+  } else {
+    // 失敗
+    char.shaking = 30;
+    showFloatingText('OUT!', screenX, screenY, '#ff1744');
+    setTimeout(() => endGame('failed'), 300);
+  }
+}
+
+function showFloatingText(text, x, y, color) {
+  const div = document.createElement('div');
+  div.className = 'floating-text';
+  div.textContent = text;
+  div.style.left = x + 'px';
+  div.style.top = y + 'px';
+  div.style.color = color;
+  div.style.textShadow = '3px 3px 0 #000';
+  div.style.position = 'fixed';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 800);
+}
+
+function updateScore() {
+  for (let i = 1; i <= collected; i++) {
+    const slot = document.getElementById('slot' + i);
+    slot.classList.remove('empty');
+    slot.classList.add('filled');
+    slot.textContent = '✓';
+  }
+}
+
+function startGame() {
+  gameState = 'playing';
+  collected = 0;
+  timeLeft = 5;
+  spawnCharacters();
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('scoreDisplay').style.display = 'flex';
+
+  // スロットリセット
+  document.querySelectorAll('.member-slot').forEach(s => {
+    s.classList.remove('filled');
+    s.classList.add('empty');
+    s.textContent = '?';
+  });
+
+  document.getElementById('timer').textContent = timeLeft;
+  document.getElementById('timer').classList.remove('danger');
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft;
+    if (timeLeft <= 2) {
+      document.getElementById('timer').classList.add('danger');
+    }
+    if (timeLeft <= 0) {
+      endGame('failed');
+    }
+  }, 1000);
+
+  gameLoop();
+}
+
+function endGame(result) {
+  if (gameState !== 'playing') return;
+  gameState = result;
+
+  clearInterval(timerInterval);
+  cancelAnimationFrame(animationId);
+
+  const screen = document.getElementById('resultScreen');
+  const text = document.getElementById('resultText');
+  screen.classList.remove('success', 'failed');
+  screen.classList.add(result);
+
+  if (result === 'success') {
+    text.textContent = 'CLEAR!';
+    text.style.color = '#fff';
+  } else {
+    text.textContent = 'FAILED...';
+    text.style.color = '#fff';
+  }
+}
+
+function resetGame() {
+  gameState = 'ready';
+  document.getElementById('resultScreen').classList.remove('success', 'failed');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('scoreDisplay').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+}
+
+document.getElementById('startScreen').addEventListener('click', startGame);
+
+// 初期描画（待機中もキャラを表示）
+spawnCharacters();
+gameLoop();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "iwashin-game",
+  "version": "0.1.0",
+  "description": "いわしん製作プロジェクト - メイドインワリオ風5秒ミニゲーム集",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server -p 8080 -c-1",
+    "start": "npx http-server -p 8080 -c-1"
+  },
+  "keywords": ["phaser", "game", "minigame"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

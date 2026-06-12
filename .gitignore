@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+.vscode/
+*.log
+dist/
+build/
+.cache/
+ios/
+android/
+.claude/
+~$*

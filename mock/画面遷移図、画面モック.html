@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>いわしん製作プロジェクト - 画面モック</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #2a2a30;
+    color: #eee;
+    padding: 40px 20px;
+  }
+  h1 {
+    color: #c8a96e;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+  h1 + p { color: #aaa; margin-bottom: 40px; }
+  h2 {
+    color: #fff;
+    font-weight: 500;
+    margin: 60px 0 20px;
+    font-size: 22px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #444;
+  }
+  .desc { color: #999; margin-bottom: 24px; font-size: 14px; }
+
+  /* 画面遷移図 */
+  .flow {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .flow-node {
+    background: #f5f5f8;
+    border: 1px solid #d0d0d8;
+    border-radius: 8px;
+    padding: 12px 24px;
+    text-align: center;
+    min-width: 280px;
+  }
+  .flow-node.title { background: #fff8e1; border-color: #c8a96e; }
+  .flow-node.select { background: #e3f2fd; border-color: #1976d2; }
+  .flow-node.intro { background: #f3e5f5; border-color: #7b1fa2; }
+  .flow-node.game { background: #fff3e0; border-color: #f57c00; }
+  .flow-node.result { background: #f5f5f5; border-color: #666; }
+  .flow-node.boss { background: #ffebee; border-color: #c62828; }
+  .flow-node.clear { background: #e0f2f1; border-color: #00796b; }
+  .flow-node .name { font-weight: 600; font-size: 14px; }
+  .flow-node .sub { font-size: 12px; color: #666; margin-top: 4px; }
+  .flow-arrow {
+    color: #888;
+    font-size: 16px;
+    line-height: 1;
+    position: relative;
+  }
+  .flow-arrow .label {
+    font-size: 11px;
+    color: #888;
+    margin-left: 8px;
+  }
+  .flow-loop {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #fffde7;
+    border: 1px dashed #c8a96e;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #6a4a00;
+  }
+
+  /* スマホフレーム */
+  .mocks {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .mock-wrap {
+    text-align: center;
+  }
+  .mock-label {
+    color: #c8a96e;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .phone {
+    width: 320px;
+    height: 692px;
+    background: #000;
+    border-radius: 36px;
+    padding: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== タイトル画面 ===== */
+  .title-screen {
+    background: #0d1b2a;
+    color: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 60px 20px 40px;
+    font-family: serif;
+  }
+  .title-line {
+    width: 80%;
+    height: 1px;
+    background: #c8a96e;
+  }
+  .title-line.double {
+    border-top: 1px solid #c8a96e;
+    height: 4px;
+    border-bottom: 2px solid #c8a96e;
+    background: none;
+  }
+  .title-subtitle {
+    color: #c8a96e;
+    font-size: 12px;
+    letter-spacing: 4px;
+    margin-top: 8px;
+  }
+  .title-main {
+    text-align: center;
+  }
+  .title-name {
+    font-size: 56px;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+  .title-project {
+    font-size: 20px;
+    color: #ddd;
+    letter-spacing: 6px;
+    margin-top: 12px;
+  }
+  .title-divider {
+    color: #c8a96e;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  .title-tagline {
+    color: #aaa;
+    font-size: 12px;
+  }
+  .title-start {
+    color: #fff;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 6px;
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  /* ===== 編選択画面 ===== */
+  .select-screen {
+    background: #f5f0e8;
+    color: #222;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .select-header {
+    background: #1a1a2e;
+    color: #c8a96e;
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+    font-family: serif;
+  }
+  .select-toc {
+    text-align: center;
+    padding: 12px;
+    color: #555;
+    font-size: 12px;
+    font-family: serif;
+  }
+  .select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 12px 12px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .chapter-card {
+    background: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    padding: 0;
+    height: 92px;
+    position: relative;
+  }
+  .chapter-card.unlocked {
+    cursor: pointer;
+  }
+  .chapter-card.cleared {
+    background: #e8f5e9;
+    border-color: #4caf50;
+  }
+  .chapter-card.locked {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  .chapter-bar {
+    height: 6px;
+  }
+  .ch1 .chapter-bar { background: #2c5f8a; }
+  .ch2 .chapter-bar { background: #3a7d44; }
+  .ch3 .chapter-bar { background: #8a2c2c; }
+  .ch4 .chapter-bar { background: #7a4a9a; }
+  .ch5 .chapter-bar { background: #8a6a2c; }
+  .ch6 .chapter-bar { background: #2c7a7a; }
+  .ch7 .chapter-bar { background: #8a4a2c; }
+  .ch8 .chapter-bar { background: #2c4a8a; }
+  .ch9 .chapter-bar { background: #5a7a2c; }
+  .ch10 .chapter-bar { background: #8a2c6a; }
+  .chapter-body {
+    padding: 6px 8px;
+    font-family: serif;
+  }
+  .chapter-num {
+    font-size: 10px;
+    color: #888;
+  }
+  .chapter-title {
+    font-weight: bold;
+    font-size: 12px;
+    color: #222;
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .chapter-status {
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .chapter-status.play { color: #1a6aaa; }
+  .chapter-status.done { color: #4caf50; }
+  .chapter-cleared-mark {
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    font-size: 12px;
+  }
+  .chapter-locked-text {
+    padding: 14px 10px;
+    font-family: serif;
+  }
+  .chapter-locked-num {
+    color: #555;
+    font-size: 11px;
+  }
+  .chapter-locked-mask {
+    font-family: monospace;
+    color: #222;
+    font-size: 16px;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+  .lock-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+  }
+  .select-footer {
+    padding: 8px 16px;
+    color: #888;
+    font-family: monospace;
+    font-size: 11px;
+    text-align: right;
+  }
+
+  /* ===== イントロ画面 ===== */
+  .intro-screen {
+    background: #2c5f8a;
+    color: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: serif;
+    position: relative;
+    padding: 40px 30px;
+  }
+  .intro-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+  }
+  .intro-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    width: 100%;
+  }
+  .intro-line-top, .intro-line-bottom {
+    width: 100%;
+    height: 1px;
+    background: #fff;
+    margin: 20px 0;
+  }
+  .intro-chapter-num {
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: 10px;
+    margin-bottom: 30px;
+  }
+  .intro-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .intro-subtitle {
+    font-size: 13px;
+    color: #ddd;
+    margin-top: 16px;
+  }
+  .intro-mg-count {
+    font-size: 13px;
+    color: #ffeeaa;
+    margin-top: 30px;
+  }
+
+  /* ===== 編クリア画面 ===== */
+  .clear-screen {
+    background: #0d1b2a;
+    color: #fff;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 30px 40px;
+    font-family: serif;
+    position: relative;
+    overflow: hidden;
+  }
+  .clear-stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .clear-stars span {
+    position: absolute;
+    color: #c8a96e;
+    font-size: 12px;
+    opacity: 0.4;
+  }
+  .clear-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    width: 100%;
+  }
+  .clear-label {
+    font-size: 30px;
+    color: #c8a96e;
+    font-weight: bold;
+    letter-spacing: 4px;
+  }
+  .clear-chapter {
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 6px;
+    margin-top: 24px;
+  }
+  .clear-stars-row {
+    font-size: 36px;
+    color: #ffcc00;
+    letter-spacing: 8px;
+    margin-top: 30px;
+  }
+  .clear-divider {
+    width: 80%;
+    height: 1px;
+    background: #555;
+    margin: 30px auto;
+  }
+  .clear-unlock {
+    color: #88ddff;
+    font-size: 14px;
+  }
+  .clear-score {
+    color: #aaa;
+    font-family: monospace;
+    font-size: 13px;
+    margin-top: 30px;
+  }
+  .clear-button {
+    margin-top: auto;
+    background: #c8a96e;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    padding: 14px 40px;
+    font-weight: bold;
+    font-size: 16px;
+    font-family: serif;
+    cursor: pointer;
+  }
+
+  /* 注釈エリア */
+  .annot {
+    background: #1a1a20;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+    max-width: 320px;
+    font-size: 12px;
+    color: #ccc;
+    line-height: 1.6;
+  }
+  .annot b { color: #c8a96e; }
+</style>
+</head>
+<body>
+
+<h1>いわしん製作プロジェクト 画面モック</h1>
+<p>画面遷移図と各画面のビジュアルモック（スマホ縦画面 390×844基準）</p>
+
+<!-- ===== 画面遷移図 ===== -->
+<h2>① 画面遷移図</h2>
+<p class="desc">タイトル→編選択→編イントロ→ミニゲーム→結果→ボス→編クリア→編選択（次編解放）</p>
+
+<div class="flow">
+  <div class="flow-node title">
+    <div class="name">TitleScene</div>
+    <div class="sub">タイトル画面 / TAP TO START</div>
+  </div>
+  <div class="flow-arrow">↓<span class="label">タップ</span></div>
+
+  <div class="flow-node select">
+    <div class="name">ChapterSelectScene</div>
+    <div class="sub">編選択（黒塗りロック表示）</div>
+  </div>
+  <div class="flow-arrow">↓<span class="label">解放済みの編をタップ</span></div>
+
+  <div class="flow-node intro">
+    <div class="name">ChapterIntroScene</div>
+    <div class="sub">編イントロ（章扉演出）</div>
+  </div>
+  <div class="flow-arrow">↓<span class="label">2秒 自動遷移</span></div>
+
+  <div class="flow-node game">
+    <div class="name">MG01〜MG07（ランダム順）</div>
+    <div class="sub">ミニゲーム本体 5秒</div>
+  </div>
+  <div class="flow-arrow">↓</div>
+
+  <div class="flow-node result">
+    <div class="name">ResultScene</div>
+    <div class="sub">SUCCESS / FAILED 表示</div>
+  </div>
+  <div class="flow-loop">↻ 全MGクリアまで「ミニゲーム→Result」ループ</div>
+  <div class="flow-arrow">↓<span class="label">全MGクリア</span></div>
+
+  <div class="flow-node boss">
+    <div class="name">BossScene</div>
+    <div class="sub">ボスゲーム（60秒〜2分）</div>
+  </div>
+  <div class="flow-arrow">↓<span class="label">ボスクリア</span></div>
+
+  <div class="flow-node clear">
+    <div class="name">ChapterClearScene</div>
+    <div class="sub">編クリア演出・次編解放（localStorage保存）</div>
+  </div>
+  <div class="flow-arrow">↺<span class="label">「続ける」ボタンで編選択に戻る</span></div>
+</div>
+
+
+<!-- ===== モック ===== -->
+<h2>② タイトル画面（TitleScene）</h2>
+<p class="desc">報告書の表紙風。タップでスタート。</p>
+<div class="mocks">
+  <div class="mock-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="title-screen">
+          <div style="width: 100%;">
+            <div class="title-line double"></div>
+            <div class="title-subtitle">第三者委員会報告書より</div>
+          </div>
+          <div class="title-main">
+            <div class="title-name">いわしん</div>
+            <div class="title-divider">── ◆ ──</div>
+            <div class="title-tagline">〜 5秒でわかる無断借名融資 〜</div>
+          </div>
+          <div>
+            <div class="title-start">TAP TO START</div>
+            <div style="width: 100%; margin-top: 30px;">
+              <div class="title-line double"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annot">
+      <b>演出</b><br>
+      ・フェードイン（600ms）<br>
+      ・TAP TO START が点滅<br>
+      ・タップで編選択にフェードアウト遷移
+    </div>
+  </div>
+</div>
+
+
+<h2>③ 編選択画面（ChapterSelectScene）</h2>
+<p class="desc">第1編〜第10編をグリッド表示。クリア済みは緑、未クリアは白、ロック中は黒塗り。</p>
+<div class="mocks">
+  <div class="mock-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="select-screen">
+          <div class="select-header">📄 第三者委員会報告書</div>
+          <div class="select-toc">── 目　次 ──</div>
+          <div class="select-grid">
+
+            <!-- 第1編：クリア済み -->
+            <div class="chapter-card unlocked cleared ch1">
+              <div class="chapter-bar"></div>
+              <div class="chapter-body">
+                <div class="chapter-num">第1編</div>
+                <div class="chapter-title">第三者委員会の概要</div>
+              </div>
+              <span class="chapter-cleared-mark">✅</span>
+              <div class="chapter-status done">調査完了</div>
+            </div>
+
+            <!-- 第2編：解放済み -->
+            <div class="chapter-card unlocked ch2">
+              <div class="chapter-bar"></div>
+              <div class="chapter-body">
+                <div class="chapter-num">第2編</div>
+                <div class="chapter-title">組織体制・管理体制</div>
+              </div>
+              <div class="chapter-status play">プレイする</div>
+            </div>
+
+            <!-- 第3編：ロック -->
+            <div class="chapter-card locked ch3">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第3編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第4編：ロック -->
+            <div class="chapter-card locked ch4">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第4編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第5編：ロック -->
+            <div class="chapter-card locked ch5">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第5編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第6編：ロック -->
+            <div class="chapter-card locked ch6">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第6編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第7編：ロック -->
+            <div class="chapter-card locked ch7">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第7編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第8編：ロック -->
+            <div class="chapter-card locked ch8">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第8編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第9編：ロック -->
+            <div class="chapter-card locked ch9">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第9編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+            <!-- 第10編：ロック -->
+            <div class="chapter-card locked ch10">
+              <div class="chapter-locked-text">
+                <div class="chapter-locked-num">第10編</div>
+                <div class="chapter-locked-mask">██████████</div>
+              </div>
+              <span class="lock-icon">🔒</span>
+            </div>
+
+          </div>
+          <div class="select-footer">総合：3勝 5敗</div>
+        </div>
+      </div>
+    </div>
+    <div class="annot">
+      <b>3つの状態</b><br>
+      ・<span style="color:#88ee88">緑＋✅</span>：クリア済み<br>
+      ・<span style="color:#fff">白＋カラーバー</span>：解放済み・未クリア<br>
+      ・<span style="color:#888">黒塗り＋🔒</span>：ロック中<br>
+      <br>
+      <b>ロック表示</b><br>
+      「第○編 ██████████」で番号だけ見える
+    </div>
+  </div>
+</div>
+
+
+<h2>④ 編イントロ画面（ChapterIntroScene）</h2>
+<p class="desc">章扉ページ風。2秒で自動的に最初のミニゲームへ遷移。</p>
+<div class="mocks">
+  <div class="mock-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="intro-screen">
+          <div class="intro-content">
+            <div class="intro-line-top"></div>
+            <div class="intro-chapter-num">第 1 編</div>
+            <div class="intro-title">第三者委員会の概要</div>
+            <div class="intro-subtitle">SNS投稿・独立性・内部調査</div>
+            <div class="intro-mg-count">ミニゲーム 7 本 ＋ ボスあり</div>
+            <div class="intro-line-bottom"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annot">
+      <b>テーマカラー</b><br>
+      各編ごとに異なる背景色（第1編はネイビー）<br>
+      <br>
+      <b>演出</b><br>
+      ・編番号 → タイトル → サブタイトル の順にフェードイン<br>
+      ・2.2秒後に自動でミニゲームへ<br>
+      ・途中タップで即スキップ可
+    </div>
+  </div>
+</div>
+
+
+<h2>⑤ 編クリア画面（ChapterClearScene）</h2>
+<p class="desc">ボスクリア後に表示。次編が解放されたことを通知。</p>
+<div class="mocks">
+  <div class="mock-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="clear-screen">
+          <div class="clear-stars">
+            <span style="top:8%; left:15%; font-size:14px;">★</span>
+            <span style="top:15%; left:80%; font-size:10px;">★</span>
+            <span style="top:25%; left:60%; font-size:16px;">★</span>
+            <span style="top:42%; left:10%; font-size:8px;">★</span>
+            <span style="top:55%; left:85%; font-size:12px;">★</span>
+            <span style="top:70%; left:25%; font-size:14px;">★</span>
+            <span style="top:85%; left:70%; font-size:10px;">★</span>
+          </div>
+          <div class="clear-content">
+            <div class="clear-label">調 査 完 了 ！</div>
+            <div class="clear-chapter">第 1 編</div>
+            <div class="clear-stars-row">★ ★ ★</div>
+            <div class="clear-divider"></div>
+            <div class="clear-unlock">第 2 編 が解放されました</div>
+            <div class="clear-score">総合スコア：8勝 4敗</div>
+          </div>
+          <button class="clear-button">続ける ▶</button>
+        </div>
+      </div>
+    </div>
+    <div class="annot">
+      <b>処理順序</b><br>
+      ① ProgressManager.clearChapter() を呼ぶ<br>
+      ② localStorageに保存（次編解放）<br>
+      ③ 解放された編番号を画面に表示<br>
+      <br>
+      <b>第10編クリア時</b><br>
+      「全編 調査完了！お疲れ様でした」に切り替え
+    </div>
+  </div>
+</div>
+
+<h2 style="margin-bottom: 10px;">📝 補足</h2>
+<p style="color: #ccc; font-size: 14px; line-height: 1.8;">
+  各画面のサイズは <b style="color: #c8a96e;">390×844px（iPhone基準）</b>。実機では Phaser.Scale.FIT でアスペクト維持しつつスクリーンサイズに合わせて拡縮されます。<br>
+  進捗保存は <b style="color: #c8a96e;">localStorage</b> キー <code style="background:#222; padding:2px 6px; border-radius:3px;">iwashin_progress</code> に保管。<br>
+  このモックを Claude Code に渡せば、各シーンファイル（TitleScene.js / ChapterSelectScene.js / ChapterIntroScene.js / ChapterClearScene.js）の実装イメージが共有できます。
+</p>
+
+</body>
+</html>
