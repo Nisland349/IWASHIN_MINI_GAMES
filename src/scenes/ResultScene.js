@@ -84,10 +84,10 @@ export default class ResultScene extends Phaser.Scene {
       }).setOrigin(0.5);
 
       this.time.delayedCall(2000, () => {
-        this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.cameras.main.fadeOut(400, 0, 0, 0);
+        this.time.delayedCall(450, () => {
           this.scene.start('ChapterClearScene', { chapter: this.chapter });
         });
-        this.cameras.main.fadeOut(400, 0, 0, 0);
       });
     } else {
       // ボス失敗 → リトライボタン
@@ -133,10 +133,8 @@ export default class ResultScene extends Phaser.Scene {
       const go = () => {
         if (triggered) return;
         triggered = true;
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.scene.start(bossKey);
-        });
         this.cameras.main.fadeOut(400, 0, 0, 0);
+        this.time.delayedCall(450, () => this.scene.start(bossKey));
       };
       const timer = this.time.delayedCall(2500, go);
       this.input.once('pointerdown', () => { timer.remove(); go(); });
