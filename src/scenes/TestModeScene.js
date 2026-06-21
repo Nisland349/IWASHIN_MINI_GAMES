@@ -198,9 +198,7 @@ export default class TestModeScene extends Phaser.Scene {
       if (boss) GameManager.currentChapter = boss.chapter;
     }
 
-    this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start(key);
-    });
     this.cameras.main.fadeOut(200, 0, 0, 0);
+    this.time.delayedCall(250, () => this.scene.start(key));
   }
 }

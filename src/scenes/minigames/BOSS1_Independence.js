@@ -110,11 +110,14 @@ export default class BOSS1_Independence extends MiniGameBase {
     const x = CENTER_X;
     const y = CENTER_Y;
     const s = 12;
-    this.playerG.beginPath();
-    this.playerG.moveTo(x, y + s * 0.75);
-    this.playerG.bezierCurveTo(x - s * 1.15, y - s * 0.05, x - s * 1.15, y - s * 0.95, x, y - s * 0.25);
-    this.playerG.bezierCurveTo(x + s * 1.15, y - s * 0.95, x + s * 1.15, y - s * 0.05, x, y + s * 0.75);
-    this.playerG.fillPath();
+    // Phaser3 の Graphics に bezierCurveTo がないため 2円＋三角形でハート近似
+    this.playerG.fillCircle(x - s * 0.5, y - s * 0.15, s * 0.62);
+    this.playerG.fillCircle(x + s * 0.5, y - s * 0.15, s * 0.62);
+    this.playerG.fillTriangle(
+      x - s * 1.05, y - s * 0.05,
+      x + s * 1.05, y - s * 0.05,
+      x,            y + s * 0.9
+    );
   }
 
   _createShield() {

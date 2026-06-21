@@ -79,17 +79,13 @@ export default class ChapterIntroScene extends Phaser.Scene {
     GameManager.startChapter(this.chapterNum);
     const first = GameManager.pickNextMGInChapter();
     if (first) {
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start(first.key);
-      });
       this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(350, () => this.scene.start(first.key));
     } else {
       // MGが存在しない場合はボスへ
       const bossKey = GameManager.getCurrentChapterBoss();
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start(bossKey);
-      });
       this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(350, () => this.scene.start(bossKey));
     }
   }
 }

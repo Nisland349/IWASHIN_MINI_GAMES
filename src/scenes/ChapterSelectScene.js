@@ -45,10 +45,8 @@ export default class ChapterSelectScene extends Phaser.Scene {
     backBtn.on('pointerover', () => backBtn.setColor('#ffffff'));
     backBtn.on('pointerout', () => backBtn.setColor('#aaaaaa'));
     backBtn.on('pointerdown', () => {
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('TitleScene');
-      });
       this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.time.delayedCall(350, () => this.scene.start('TitleScene'));
     });
 
     // サブヘッダー
@@ -129,10 +127,8 @@ export default class ChapterSelectScene extends Phaser.Scene {
       // タップで ChapterIntroScene へ
       bg.setInteractive({ useHandCursor: true });
       bg.on('pointerdown', () => {
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.scene.start('ChapterIntroScene', { chapter: n });
-        });
         this.cameras.main.fadeOut(300, 0, 0, 0);
+        this.time.delayedCall(350, () => this.scene.start('ChapterIntroScene', { chapter: n }));
       });
       bg.on('pointerover', () => bg.setFillStyle(0xeef4ff));
       bg.on('pointerout', () => bg.setFillStyle(0xffffff));

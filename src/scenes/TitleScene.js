@@ -72,10 +72,8 @@ export default class TitleScene extends Phaser.Scene {
 
     // タップで ChapterSelectScene へ遷移
     this.input.once('pointerdown', () => {
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('ChapterSelectScene');
-      });
       this.cameras.main.fadeOut(400, 0, 0, 0);
+      this.time.delayedCall(450, () => this.scene.start('ChapterSelectScene'));
     });
   }
 

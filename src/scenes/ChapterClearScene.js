@@ -125,10 +125,8 @@ export default class ChapterClearScene extends Phaser.Scene {
     btnBg.on('pointerover', () => btnBg.setFillStyle(0xe8c97e));
     btnBg.on('pointerout', () => btnBg.setFillStyle(0xc8a96e));
     btnBg.on('pointerdown', () => {
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('ChapterSelectScene');
-      });
       this.cameras.main.fadeOut(400, 0, 0, 0);
+      this.time.delayedCall(450, () => this.scene.start('ChapterSelectScene'));
     });
   }
 }
