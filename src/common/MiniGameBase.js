@@ -20,6 +20,7 @@ export default class MiniGameBase extends Phaser.Scene {
 
   // サブクラスは super.create() を必ず呼ぶこと
   create() {
+    console.log(`[MiniGameBase.create] key=${this.scene.key} cameraAlpha=${this.cameras.main.alpha}`);
     this.isPlaying = false;
     this.hasEnded = false;
 
@@ -35,6 +36,7 @@ export default class MiniGameBase extends Phaser.Scene {
 
   // タイトル演出（1秒）→ ゲーム開始
   showTitle() {
+    console.log(`[MiniGameBase.showTitle] key=${this.scene.key}`);
     const titleText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, this.gameTitle, {
       fontFamily: 'sans-serif',
       fontSize: '32px',
@@ -62,6 +64,7 @@ export default class MiniGameBase extends Phaser.Scene {
 
   // ゲーム本編開始
   startGame() {
+    console.log(`[MiniGameBase.startGame] key=${this.scene.key}`);
     this.isPlaying = true;
     this.timer.start();
     if (typeof this.onGameStart === 'function') {

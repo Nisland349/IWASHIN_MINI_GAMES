@@ -13,6 +13,7 @@ export default class ResultScene extends Phaser.Scene {
     this.prevMGKey = data.mgKey;
     this.chapter = data.chapter || GameManager.currentChapter || 1;
     this.isBoss = this.prevMGKey && this.prevMGKey.startsWith('BOSS');
+    console.log(`[ResultScene.init] mgKey=${this.prevMGKey} success=${this.success} chapter=${this.chapter} isBoss=${this.isBoss}`);
   }
 
   create() {
@@ -112,6 +113,7 @@ export default class ResultScene extends Phaser.Scene {
 
   _handleMGResult() {
     const nextMG = GameManager.pickNextMGInChapter();
+    console.log(`[ResultScene._handleMGResult] chapter=${GameManager.currentChapter} nextMG=${nextMG ? nextMG.key : null} playedMGs=[${[...GameManager.chapterPlayedMGs]}]`);
     if (nextMG) {
       // まだ未プレイMGがある
       const go = () => this.scene.start(nextMG.key);
@@ -120,6 +122,7 @@ export default class ResultScene extends Phaser.Scene {
     } else {
       // 全MG完了 → ボスへ
       const bossKey = GameManager.getCurrentChapterBoss();
+      console.log(`[ResultScene._handleMGResult] → BOSS遷移: bossKey=${bossKey}`);
       this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 100, 'BOSS に挑戦！', {
         fontFamily: 'sans-serif',
         fontSize: '22px',
@@ -133,8 +136,12 @@ export default class ResultScene extends Phaser.Scene {
       const go = () => {
         if (triggered) return;
         triggered = true;
+        console.log(`[ResultScene] go() 実行: fadeOut開始`);
         this.cameras.main.fadeOut(400, 0, 0, 0);
-        this.time.delayedCall(450, () => this.scene.start(bossKey));
+        this.time.delayedCall(450, () => {
+          console.log(`[ResultScene] scene.start(${bossKey}) 呼び出し`);
+          this.scene.start(bossKey);
+        });
       };
       const timer = this.time.delayedCall(2500, go);
       this.input.once('pointerdown', () => { timer.remove(); go(); });

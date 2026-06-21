@@ -32,6 +32,7 @@ export default class BOSS1_Independence extends MiniGameBase {
   }
 
   create() {
+    console.log(`[BOSS1_Independence.create] 開始 cameraAlpha=${this.cameras.main.alpha}`);
     this.hp = MAX_HP;
     this.shieldDir = DIR_UP;
     this.spears = [];
@@ -49,6 +50,7 @@ export default class BOSS1_Independence extends MiniGameBase {
   }
 
   onGameStart() {
+    console.log(`[BOSS1_Independence.onGameStart] 開始`);
     this._setupInput();
     this._startSpawner();
   }
